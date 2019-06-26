@@ -12,7 +12,7 @@ from os import path, mkdir, getcwd
 
 class Player(object):
     def __init__(self, q_player, Q={}):
-        self.is_q = q_player
+        self._is_q = q_player
         self.games_won = 0
         self.Q = Q
 
@@ -23,37 +23,37 @@ class Player(object):
 
         self.file_path = path.join(getcwd(),"data", qfile)
 
-    def isQ(self):
-        return self.is_q
+    def is_q(self):
+        return self._is_q
 
-    def isTurn(self):
-        return self.is_turn
+    def is_turn(self):
+        return self._is_turn
 
-    def setTurn(self, is_turn):
-        self.is_turn = is_turn
+    def set_turn(self, is_turn):
+        self._is_turn = is_turn
 
     def won(self):
         self.games_won += 1
 
-        if self.isQ():
+        if self.is_q():
             print("Grandma won")
         else:
             print("User won")
 
-    def getWon(self):
+    def get_won(self):
         return self.games_won
 
-    def switchTurn(self):
-        self.is_turn = not self.is_turn
+    def switch_turn(self):
+        self._is_turn = not self._is_turn
 
-    def setActions(self, n_actions):
+    def set_actions(self, n_actions):
         self.n_actions = n_actions
 
-    def saveQTable(self):
+    def save_qtable(self):
         with open(self.file_path, 'wb') as handle:
             pickle.dump(self.Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    def loadQTable(self):
+    def load_qtable(self):
         if not path.isfile(self.file_path):
             self.Q = {}
         else:
@@ -70,7 +70,7 @@ class QLearner(Player):
     def __init__(self, q_player, Q={}):
         super(QLearner, self).__init__(q_player, Q)
 
-    def getQ(self, state, action=None):
+    def get_q(self, state, action=None):
         if not self.Q.get(state):
             self.Q[state] = [0] * self.n_actions
         if action:
@@ -78,24 +78,24 @@ class QLearner(Player):
         else:
             return self.Q[state]
 
-    def setQ(self, state, action, q):
+    def set_q(self, state, action, q):
         if not self.Q.get(state):
             self.Q[state] = [0] * self.n_actions
         self.Q[state][action - 1] = q
 
     #probability that random action is chosen encourages exploration of
     #the state/action space
-    def chooseAction(self, state, game):
+    def choose_action(self, state, game):
         if random() < game.epsilon:
             return randint(1, game.n_actions)
         else:
-            return self._minmaxQ(state, game.n_actions)
+            return self._minmax_q(state, game.n_actions)
 
-    def _minmaxQ(self, state, n_actions):
+    def _minmax_q(self, state, n_actions):
         if not self.Q.get(state):
             self.Q[state] = [0] * self.n_actions
 
-        if self.isQ():
+        if self.is_q():
             q = max(self.Q[state])
         else:
             q = min(self.Q[state])
@@ -110,11 +110,11 @@ class HPlayer(Player):
         super(HPlayer, self).__init__(False, Q={})
 
     #prompt Human user for action
-    def chooseAction(self, state, game):
-        action = raw_input("Eat Meatballs: ")
+    def choose_action(self, state, game):
+        action = input("Eat Meatballs: ")
 
-        while not game.validMove(state, action):
-            action = raw_input("Enter a valid number of meatballs: ")
+        while not game.valid_move(state, action):
+            action = input("Enter a valid number of meatballs: ")
         return int(action)
 
 #Class for Random-Selection algorithm
@@ -122,5 +122,5 @@ class RPlayer(Player):
     def __init__(self):
         super(RPlayer, self).__init__(False, Q={})
 
-    def chooseAction(self, state, game):
+    def choose_action(self, state, game):
         return randint(1, game.n_actions)

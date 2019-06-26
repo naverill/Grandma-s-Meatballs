@@ -10,7 +10,7 @@ import sys
 from grandmas_meatballs import GrandmasMeatballs
 
 def playing():
-     game = raw_input("Continue? (y/n) ")
+     game = input("Continue? (y/n) ")
 
      if game.lower() == "y":
          return True
@@ -28,4 +28,4 @@ if __name__=="__main__":
 
     if game.setup(sys.argv):
         while playing():
-            game.startGame(grandma, player)
+            game.start_game(grandma, player)

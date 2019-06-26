@@ -21,14 +21,14 @@ class GrandmasMeatballs(QMinMaxGame):
 
     #Reinforcement Learning for two Q-Learning agents
     def train(self, n_trials):
-        state = self._initPlayers()
+        state = self._init_players()
         trial = 1
         n_updates = n_trials//20 #rate at which game statistics are updated
 
         while trial <= n_trials:
             print("Trial #" + str(trial))
             if trial % n_updates == 0:
-                self.updateStats(trial)
+                self.update_stats(trial)
                 #decrease randomness of actions
                 if self.epsilon >= 0.05:
                     self.epsilon -= 0.05
@@ -37,68 +37,68 @@ class GrandmasMeatballs(QMinMaxGame):
 
             player = self.UPlayer #user starts round
 
-            while not self.gameOver(state):
-                action = player.chooseAction(state, self)
+            while not self.game_over(state):
+                action = player.choose_action(state, self)
 
                 self.render(player, state, action)
 
-                self.updateQ(player, state, action)
+                self.update_q(player, state, action)
 
-                player = self.switchPlayer()
+                player = self.switch_player()
 
-                state = self.nextState(state, action)
+                state = self.next_state(state, action)
 
             player.won()
             state = self.reset()
             trial += 1
 
-        self.saveTrainStats()
+        self.save_train_stats()
 
     #Play for Q-Learning Agent vs. Randon-Selection Algorithm
-    def randomPlay(self, n_trials, rplayer):
+    def random_play(self, n_trials, rplayer):
         trial = 1
         n_updates = n_trials//20
         self.UPlayer = rplayer
-        state = self._initPlayers()
+        state = self._init_players()
 
         while trial <= n_trials:
 
             if trial % n_updates == 0:
-                self.updateStats(trial)
+                self.update_stats(trial)
 
             player = self.UPlayer
 
-            while not self.gameOver(state):
-                action = player.chooseAction(state, self)
+            while not self.game_over(state):
+                action = player.choose_action(state, self)
 
                 self.render(player, state, action)
 
-                player = self.switchPlayer()
+                player = self.switch_player()
 
-                state = self.nextState(state, action)
+                state = self.next_state(state, action)
 
             player.won()
             state = self.reset()
             trial += 1
 
     #Q-Learning Algorithm vs. Human Player
-    def startGame(self, grandma, user):
+    def start_game(self, grandma, user):
         self.UPlayer = user;
-        state = self._initPlayers()
+        state = self._init_players()
         player = user; #user starts round
 
-        while not self.gameOver(state):
-            action = player.chooseAction(state, self)
+        while not self.game_over(state):
+            action = player.choose_action(state, self)
 
             self.render(player, state, action)
 
-            player = self.switchPlayer()
+            player = self.switch_player()
 
-            state = self.nextState(state, action)
+            state = self.next_state(state, action)
         player.won()
         state = self.reset()
 
-    def nextState(self, state, action):
+    def next_state(self, state, action):
         return state + action
 
     def reward(self, player, state):
@@ -111,15 +111,15 @@ class GrandmasMeatballs(QMinMaxGame):
         else:
             r = 0.0
 
-        if player.isQ():
+        if player.is_q():
             return r
         else:
             return -r
 
-    def gameOver(self, state):
+    def game_over(self, state):
         return state >= self.n_states
 
-    def validMove(self, state, action):
+    def valid_move(self, state, action):
         try:
             action = int(action)
 
@@ -144,36 +144,36 @@ class GrandmasMeatballs(QMinMaxGame):
             print("Invalid move: not an integer.")
             return False
 
-    def _initPlayers(self):
-        self.resetPlayers()
-        self.UPlayer.setActions(self.n_actions)
-        self.QPlayer.setActions(self.n_actions)
+    def _init_players(self):
+        self.reset_players()
+        self.UPlayer.set_actions(self.n_actions)
+        self.QPlayer.set_actions(self.n_actions)
 
         #Load Q-Table for Random-Selection Algorithm and Human-Player
         if isinstance(self.UPlayer, player.RPlayer) or isinstance(self.UPlayer, player.HPlayer):
-            self.UPlayer.loadQTable()
+            self.UPlayer.load_qtable()
         return 0
 
     def reset(self):
         print("\n")
         self.meatballs = init
-        self.resetPlayers()
+        self.reset_players()
         return 0
 
     #render game play in terminal
     def render(self, player, state, action):
-        mark = "G" if player.isQ() else "U"
+        mark = "G" if player.is_q() else "U"
         self.meatballs = self.meatballs[:state] + mark * action + self.meatballs[state + action:]
         print(self.meatballs)
 
-    def resetPlayers(self):
-        self.UPlayer.setTurn(True)
-        self.QPlayer.setTurn(False)
+    def reset_players(self):
+        self.UPlayer.set_turn(True)
+        self.QPlayer.set_turn(False)
 
-    def updateStats(self, trials):
+    def update_stats(self, trials):
         self.stats.append([str(trials), str(self.QPlayer.getWon()), str(float(self.QPlayer.getWon())/float(trials))])
 
-    def saveStats(self):
+    def save_stats(self):
         fpath = path.join(getcwd(),"data")
         if not path.isdir(fpath):
             mkdir(fpath)

@@ -13,39 +13,39 @@ import random
 import player
 class QMinMaxGame(object):
     def __init__(self, player, opponent, epsilon=0.95, alpha=0.5, gamma=0.5):
-        assert(player.isQ() != opponent.isQ())
+        assert(player.is_q() != opponent.is_q())
         self.QPlayer = player
         self.UPlayer = opponent
         self.epsilon = epsilon
         self.alpha = alpha
         self.gamma = gamma
 
-    def updateQ(self, player, state, action):
-        new_state = self.nextState(state, action)
+    def update_q(self, player, state, action):
+        new_state = self.next_state(state, action)
 
         rsa = self.reward(player, new_state) #reward for current (state, action)
-        qsa = player.getQ(state, action)  #current Q-value
+        qsa = player.get_q(state, action)  #current Q-value
 
-        if self.gameOver(new_state):
+        if self.game_over(new_state):
             expected = rsa
 
         else:
-            if player.isQ():
+            if player.is_q():
                 #if Q-learning agent, choose move with minimum Q value of opponent
-                expected = rsa + (self.gamma * min(self.UPlayer.getQ(new_state)))
+                expected = rsa + (self.gamma * min(self.UPlayer.get_q(new_state)))
             else:
                 #if opponent agent, choose move with maximum Q value of Q-Learner, and discount
-                expected = rsa + (self.gamma * max(self.QPlayer.getQ(new_state)))
+                expected = rsa + (self.gamma * max(self.QPlayer.get_q(new_state)))
 
         q = qsa + self.alpha * (expected - qsa)
-        player.setQ(state, action, q)
+        player.set_q(state, action, q)
 
 
-    def switchPlayer(self):
-        self.UPlayer.switchTurn()
-        self.QPlayer.switchTurn()
+    def switch_player(self):
+        self.UPlayer.switch_turn()
+        self.QPlayer.switch_turn()
 
-        return self.UPlayer if self.UPlayer.isTurn() else self.QPlayer
+        return self.UPlayer if self.UPlayer.is_turn() else self.QPlayer
 
     #set-up gameplay based on command line arguments
     def setup(self, argv):
@@ -57,31 +57,31 @@ class QMinMaxGame(object):
                 if n_trials < 20:
                     print("Error: Must be greater than 20 Trials")
                     return False
-                self.loadTrainStats()
-                self.randomPlay(n_trials, player.RPlayer())
-                self.saveTrainStats()
-                self.saveStats()
+                self.load_train_stats()
+                self.random_play(n_trials, player.RPlayer())
+                self.save_train_stats()
+                self.save_stats()
             elif argv[1]=="-t":
                 n_trials = int(argv[2])
                 if n_trials < 20:
                     print("Error: Must be greater than 20 Trials")
                     return False
                 self.train(n_trials)
-                self.saveTrainStats()
-                self.saveStats()
+                self.save_train_stats()
+                self.save_stats()
             #Load saved Q-Table and set-up free play-environment
             else:
-                self.loadTrainStats()
+                self.load_train_stats()
             return True
 
         except IndexError:
             print("Invalid command line arguments:\n\t-t n_trials to train\n\t-r n_trials for random trials\n\t-p to play\n")
             return False
 
-    def saveTrainStats(self):
-        self.QPlayer.saveQTable()
+    def save_train_stats(self):
+        self.QPlayer.save_qtable()
         self.UPlayer.saveQTable()
 
-    def loadTrainStats(self):
-        self.QPlayer.loadQTable()
+    def load_train_stats(self):
+        self.QPlayer.load_qtable()
         self.epsilon = 0
